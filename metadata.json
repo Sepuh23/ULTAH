@@ -1,0 +1,10 @@
+{
+  "name": "Kartu Ucapan Ulang Tahun Bestie",
+  "description": "Kartu ucapan ulang tahun digital interaktif untuk sahabat dengan tema Cream dan maskot Creamy si Beruang",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
