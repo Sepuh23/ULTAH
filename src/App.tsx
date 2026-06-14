@@ -371,22 +371,60 @@ class AudioService {
 
     let tempo = 120;
     let type: OscillatorType = "sine";
-    let notes: number[] = [261.63, 329.63, 392.00, 523.25];
+    let notes: { f: number; h?: number; d?: number }[] = [];
     let releaseMultiplier = 0.9;
     let targetVolume = 0.08;
 
+    // Polyphonic Beautiful "Happy Birthday To You" notes definitions
+    // C4=261.63, D4=293.66, E4=329.63, F4=349.23, G4=392.00, A4=440.00, Bb4=466.16, C5=523.25, D5=587.33, E5=659.25
+    const richHappyBirthdayMelody = [
+      { f: 261.63, h: 130.81, d: 0.5 }, // Hap- (C4, C3)
+      { f: 261.63, d: 0.5 },            // -py (C4)
+      { f: 293.66, h: 174.61, d: 1.0 }, // Birth- (D4, F3)
+      { f: 261.63, d: 1.0 },            // -day (C4)
+      { f: 349.23, h: 261.63, d: 1.0 }, // to (F4, C4)
+      { f: 329.63, h: 130.81, d: 2.0 }, // you (E4, C3)
+      
+      { f: 261.63, h: 130.81, d: 0.5 }, // Hap-
+      { f: 261.63, d: 0.5 },            // -py
+      { f: 293.66, h: 196.00, d: 1.0 }, // Birth- (D4, G3)
+      { f: 261.63, d: 1.0 },            // -day (C4)
+      { f: 392.00, h: 293.66, d: 1.0 }, // to (G4, G4)
+      { f: 349.23, h: 174.61, d: 2.0 }, // you (F4, F3)
+      
+      { f: 261.63, h: 174.61, d: 0.5 }, // Hap-
+      { f: 261.63, d: 0.5 },            // -py
+      { f: 523.25, h: 349.23, d: 1.0 }, // dear (C5, F4)
+      { f: 440.00, h: 261.63, d: 1.0 }, // Bes- (A4, C4)
+      { f: 349.23, h: 174.61, d: 1.0 }, // -tie (F4, F3)
+      { f: 329.63, h: 130.81, d: 1.0 }, // (E4, C3)
+      { f: 293.66, h: 146.83, d: 2.0 }, // (D4, D3)
+      
+      { f: 466.16, h: 233.08, d: 0.5 }, // Hap- (A#4, A#3)
+      { f: 466.16, d: 0.5 },            // -py
+      { f: 440.00, h: 349.23, d: 1.0 }, // Birth- (A4, F4)
+      { f: 349.23, h: 261.63, d: 1.0 }, // -day (F4, C4)
+      { f: 392.00, h: 196.00, d: 1.0 }, // to (G4, G3)
+      { f: 349.23, h: 130.81, d: 2.0 }  // you (F4, C3)
+    ];
+
     switch (screen) {
       case "envelope":
-        tempo = 160;
-        type = "triangle";
-        // Upbeat ceria major notes: C4, E4, G4, C5
-        notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 329.63];
+        tempo = 110;
+        type = "sine";
+        // Rich happy birthday music-box vibe right at the start
+        notes = richHappyBirthdayMelody;
+        releaseMultiplier = 1.1;
+        targetVolume = 0.085;
         break;
       case "pin":
         tempo = 100;
         type = "sawtooth";
-        // Mystery minimal vibe: A3, G3, A3, F3
-        notes = [220.00, 196.00, 220.00, 174.61, 196.00, 174.61, 220.00, 164.81];
+        // Mystery minimal vibe: A3, G3, A2, F3
+        notes = [
+          { f: 220.00 }, { f: 196.00 }, { f: 220.00 }, { f: 174.61 },
+          { f: 196.00 }, { f: 174.61 }, { f: 220.00 }, { f: 164.81 }
+        ];
         releaseMultiplier = 1.3;
         targetVolume = 0.04;
         break;
@@ -394,56 +432,71 @@ class AudioService {
         tempo = 140;
         type = "sine";
         // Silly/playful jumps with custom frequency boing
-        notes = [261.63, 349.23, 415.30, 392.00, 349.23, 261.63, 293.66, 311.13];
-        targetVolume = 0.1;
+        notes = [
+          { f: 261.63 }, { f: 349.23 }, { f: 415.30 }, { f: 392.00 },
+          { f: 349.23 }, { f: 261.63 }, { f: 293.66 }, { f: 311.13 }
+        ];
+        targetVolume = 0.095;
         break;
       case "photos":
         tempo = 90;
         type = "sine";
         // Nostalgic warm pentatonic
-        notes = [349.23, 440.00, 523.25, 587.33, 523.25, 440.00, 392.00, 349.23];
-        releaseMultiplier = 1.2;
+        notes = [
+          { f: 349.23 }, { f: 440.00 }, { f: 523.25 }, { f: 587.33 },
+          { f: 523.25 }, { f: 440.00 }, { f: 392.00 }, { f: 349.23 }
+        ];
+        releaseMultiplier = 1.25;
         targetVolume = 0.11;
         break;
       case "candle":
         tempo = 160;
         type = "sawtooth";
         // Tense/suspense fast chromatics
-        notes = [220.00, 233.08, 220.00, 233.08, 293.66, 277.18, 261.63, 246.94];
+        notes = [
+          { f: 220.00 }, { f: 233.08 }, { f: 220.00 }, { f: 233.08 },
+          { f: 293.66 }, { f: 277.18 }, { f: 261.63 }, { f: 246.94 }
+        ];
         releaseMultiplier = 0.6;
         targetVolume = 0.035;
         break;
       case "letter":
         tempo = 80;
         type = "sine";
-        // Heartfelt slow movement
-        notes = [261.63, 392.00, 440.00, 349.23, 261.63, 392.00, 440.00, 523.25];
-        releaseMultiplier = 1.4;
-        targetVolume = 0.12;
+        // Deeply acoustic heartfelt slow version of Happy Birthday
+        notes = richHappyBirthdayMelody;
+        releaseMultiplier = 1.45;
+        targetVolume = 0.11;
         break;
       case "gift":
         tempo = 180;
         type = "triangle";
         // Tadaa brass-like bouncy fast motifs
-        notes = [261.63, 329.63, 392.00, 523.25, 659.25, 523.25, 392.00, 329.63];
+        notes = [
+          { f: 261.63 }, { f: 329.63 }, { f: 392.00 }, { f: 523.25 },
+          { f: 659.25 }, { f: 523.25 }, { f: 392.00 }, { f: 329.63 }
+        ];
         releaseMultiplier = 0.85;
-        targetVolume = 0.08;
+        targetVolume = 0.088;
         break;
       case "quiz":
         tempo = 130;
         type = "triangle";
         // Game-show suspenseful syncopated upbeat
-        notes = [392.00, 392.00, 523.25, 440.00, 392.00, 349.23, 329.63, 293.66];
-        releaseMultiplier = 0.8;
-        targetVolume = 0.07;
+        notes = [
+          { f: 392.00 }, { f: 392.00 }, { f: 523.25 }, { f: 440.00 },
+          { f: 392.00 }, { f: 349.23 }, { f: 329.63 }, { f: 293.66 }
+        ];
+        releaseMultiplier = 0.82;
+        targetVolume = 0.075;
         break;
       case "final":
-        tempo = 200;
-        type = "sine";
-        // Fast glorious cascading runs for victory celebrating
-        notes = [261.63, 329.63, 392.00, 523.25, 293.66, 349.23, 440.00, 587.33, 329.63, 392.00, 523.25, 659.25, 523.25, 587.33, 659.25, 783.99];
-        releaseMultiplier = 0.75;
-        targetVolume = 0.09;
+        tempo = 132;
+        type = "triangle";
+        // Brilliant retro carnival celebratory chiptune Happy Birthday with multi-voice arpeggio chords!
+        notes = richHappyBirthdayMelody;
+        releaseMultiplier = 0.95;
+        targetVolume = 0.1;
         break;
     }
 
@@ -456,10 +509,18 @@ class AudioService {
     const playNextNote = () => {
       if (this.isMuted || !this.isMusicPlaying || !this.ctx || this.currentScreenPlaying !== screen) return;
 
-      const freq = notes[noteIndex];
-      const duration = noteInterval;
+      if (!notes || notes.length === 0) return;
+      const item = notes[noteIndex];
+      if (!item) {
+        // Safe recovery or reset if index went out of bounds
+        noteIndex = 0;
+        return;
+      }
+      const durMultiplier = item.d || 1.0;
+      const duration = noteInterval * durMultiplier;
 
-      if (freq > 0) {
+      const playOsc = (frequency: number, volScale: number = 1.0) => {
+        if (!this.ctx || frequency <= 0) return;
         try {
           const oscNow = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
@@ -472,14 +533,14 @@ class AudioService {
 
           // Slide-specific comic effect for tease screen
           if (screen === "tease" && noteIndex % 4 === 3) {
-            osc.frequency.setValueAtTime(freq, oscNow);
-            osc.frequency.exponentialRampToValueAtTime(freq * 1.7, oscNow + (duration / 1000) * 0.4);
-            osc.frequency.exponentialRampToValueAtTime(freq, oscNow + (duration / 1000) * 0.82);
+            osc.frequency.setValueAtTime(frequency, oscNow);
+            osc.frequency.exponentialRampToValueAtTime(frequency * 1.7, oscNow + (duration / 1000) * 0.4);
+            osc.frequency.exponentialRampToValueAtTime(frequency, oscNow + (duration / 1000) * 0.82);
           } else {
-            osc.frequency.setValueAtTime(freq, oscNow);
+            osc.frequency.setValueAtTime(frequency, oscNow);
           }
 
-          gain.gain.setValueAtTime(0.3, oscNow);
+          gain.gain.setValueAtTime(0.24 * volScale, oscNow);
           gain.gain.exponentialRampToValueAtTime(0.001, oscNow + (duration / 1000) * releaseMultiplier);
 
           osc.start(oscNow);
@@ -492,6 +553,15 @@ class AudioService {
         } catch (err) {
           console.error("Audio Synthesis error:", err);
         }
+      };
+
+      if (item.f > 0) {
+        // Play lead melody note
+        playOsc(item.f, 1.0);
+      }
+      if (item.h && item.h > 0) {
+        // Play harmony/accompaniment chords (slightly quieter for perfect background blend)
+        playOsc(item.h, 0.48);
       }
 
       noteIndex = (noteIndex + 1) % notes.length;
@@ -555,15 +625,15 @@ export default function App() {
   // Unsplash cozy pictures chosen carefully to convey friendship & warmth without romance
   const photos: PolaroidPhoto[] = [
     {
-      url: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=600&auto=format&fit=crop&q=80",
+      url: "/images/polaroid_1.jpg",
       caption: "Momen kocak kita pas ketawa sampe nangis 🤣"
     },
     {
-      url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&auto=format&fit=crop&q=80",
+      url: "/images/polaroid_2.jpg",
       caption: "Nongkrong absurd sambil bahas teori konspirasi duniawi ☕"
     },
     {
-      url: "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=600&auto=format&fit=crop&q=80",
+      url: "/images/polaroid_3.jpg",
       caption: "Ngemil + ngobrol asyik ga kerasa ampe lupa waktu 🤝"
     }
   ];
@@ -656,7 +726,7 @@ export default function App() {
       "Cupcake nya jangan cuma dipandangi, buruan ditiup! 🎂",
       "Kado nomor berapa yang bakal kamu pilih? 👀",
       "Kalau dipikir-pikir kita emang kocak banget wkwk 😂",
-      "Mahasigma ngirim salam hangat membara nih!"
+      "Aku ngirim salam hangat membara nih!"
     ];
     const rand = quotes[Math.floor(Math.random() * quotes.length)];
     setCreamyBubble(rand);
@@ -1045,7 +1115,7 @@ export default function App() {
                   Halo Bestie! ✨
                 </h1>
                 <p className="text-xs text-chocolate/80 leading-relaxed font-semibold max-w-xs px-2">
-                  Ada kejutan manis spesial dari <span className="text-toffee underline decoration-wavy">Mahasigma</span> nih... Bikin rukun dan hepi pokoknya!
+                  Ada kejutan manis spesial <span className="text-toffee underline decoration-wavy">dari aku</span> nih... Bikin rukun dan hepi pokoknya!
                 </p>
               </div>
 
@@ -1056,7 +1126,7 @@ export default function App() {
                   className="w-full py-3.5 px-6 rounded-[16px] bg-soft-peach border-3 border-chocolate text-chocolate font-extrabold text-sm tracking-wide shadow-[4px_4px_0px_#7F4F24] hover:shadow-[6px_6px_0px_#7F4F24] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[0px_0px_0px_#7F4F24] transition-all duration-100 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Mail className="w-4 h-4 text-chocolate fill-chocolate" />
-                  Buka Bareng Yuk 📨
+                  Buka Di Sini Ya 📨
                 </button>
                 <p className="text-sm font-handwritten text-toffee text-center mt-3 font-semibold select-none">
                   *Sambil ngopi tentunya ☕
@@ -1078,9 +1148,9 @@ export default function App() {
                 <div className="w-10 h-10 bg-toffee/15 rounded-full flex items-center justify-center mx-auto mb-1">
                   <Lock className="w-4 h-4 text-chocolate" />
                 </div>
-                <h2 className="text-xl font-extrabold text-chocolate font-sans">Gembok Bestie 🔐</h2>
+                <h2 className="text-xl font-extrabold text-[#7F4F24] font-sans">Gembok Bestie 🔐</h2>
                 <p className="text-[11px] text-chocolate/75 leading-tight font-semibold">
-                  Tanya PIN ke <span className="font-extrabold text-[#7F4F24]">Mahasigma</span> biar bisa buka kadonya! 🔐
+                  Tanya PIN ke <span className="font-extrabold text-[#7F4F24]">aku</span> biar bisa buka kadonya! 🔐
                 </p>
               </div>
 
@@ -1397,11 +1467,11 @@ export default function App() {
                 <span className="text-[10px] font-extrabold bg-toffee/15 text-toffee border border-toffee/35 px-3 py-0.5 rounded-full uppercase tracking-wider">
                   Surat Harapan Cinta 📜
                 </span>
-                <h3 className="text-xl font-black text-chocolate mt-2">Wish Letter dari Mahasigma</h3>
+                <h3 className="text-xl font-black text-chocolate mt-2">Wish Letter dari Aku</h3>
               </div>
 
               {/* Scroll paper container styling */}
-              <div className="bg-white text-chocolate p-5 rounded-2xl border-3 border-chocolate shadow-[6px_6px_0px_#D4A373] text-left max-h-[200px] overflow-y-auto leading-relaxed text-xs relative">
+              <div className="bg-white text-chocolate p-5 rounded-2xl border-3 border-chocolate shadow-[6px_6px_0px_#D4A373] text-left max-h-[340px] overflow-y-auto leading-relaxed text-xs relative">
                 <div className="absolute top-2 right-3 text-[9px] text-[#A68870] font-mono italic">
                   Private Mail Box 🤝
                 </div>
@@ -1411,15 +1481,25 @@ export default function App() {
                 </h4>
                 
                 <p className="whitespace-pre-line font-medium leading-relaxed italic text-[12px] font-sans">
-                  Happy Birthday ya bestieee! 🎉
+                  Selamat ulang tahun ya, bestie! 🎉✨
                   {"\n\n"}
-                  Makasih banget udah jadi temen curhat paling asik. Kamu tuh kocak, peduli, kadang rese juga tapi seru pokoknya!
+                  Di hari yang spesial ini, aku ingin mengucapkan terima kasih karena kamu telah hadir di dunia dan menjadi bagian dari perjalanan hidup orang-orang di sekitarmu. Kehadiranmu membawa warna, tawa, cerita, dan banyak kenangan indah yang begitu berarti.
                   {"\n\n"}
-                  Semoga makin sukses, makin kece, dan kita tetap bestie sampe tua nanti! 🤜🤛
+                  Semoga di usia yang baru ini, kamu selalu diberikan kesehatan yang kuat, hati yang tenang, pikiran yang damai, dan langkah yang dimudahkan dalam setiap urusan. Semoga segala doa yang selama ini kamu simpan dalam diam perlahan menemukan jalannya untuk menjadi kenyataan.
+                  {"\n\n"}
+                  Aku juga berdoa agar kamu selalu dikelilingi oleh orang-orang yang tulus menyayangimu, yang hadir bukan hanya saat bahagia, tetapi juga saat kamu membutuhkan tempat untuk bersandar. Semoga setiap kesedihan yang pernah kamu rasakan digantikan dengan kebahagiaan yang lebih besar, dan setiap kegagalan yang pernah kamu alami menjadi jalan menuju keberhasilan yang lebih indah.
+                  {"\n\n"}
+                  Semoga rezekimu semakin luas, karier dan pendidikanmu semakin gemilang, serta segala impian yang sedang kamu perjuangkan diberikan kemudahan untuk tercapai. Semoga kamu selalu diberi kekuatan untuk menghadapi setiap tantangan, keberanian untuk mengambil langkah baru, dan kebijaksanaan dalam setiap keputusan yang kamu pilih.
+                  {"\n\n"}
+                  Jangan pernah meragukan dirimu sendiri. Kamu adalah pribadi yang berharga, kuat, dan pantas mendapatkan hal-hal baik dalam hidup. Tetaplah menjadi dirimu yang hangat, baik hati, dan selalu membawa energi positif bagi orang-orang di sekitarmu.
+                  {"\n\n"}
+                  Terima kasih karena sudah bertahan sejauh ini. Terima kasih atas semua kebaikan, perhatian, dan cerita yang telah kamu bagikan. Semoga tahun ini menjadi salah satu bab terbaik dalam hidupmu, penuh dengan kesempatan baru, kebahagiaan yang tak terduga, dan momen-momen yang akan selalu dikenang.
+                  {"\n\n"}
+                  Selamat bertambah usia, bestie. 🎂🎈
                 </p>
                 
                 <div className="text-right font-black mt-4 text-chocolate text-[12px]">
-                  — Mahasigma (bestie loe 👊)
+                  — Saya
                 </div>
               </div>
 
